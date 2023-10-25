@@ -1,0 +1,36 @@
+version: '3.5'
+
+networks:
+  nef:
+    name: nef
+
+services:
+  nef_db:
+    image: mysql:5.7
+    container_name: nef_db
+    environment:
+      MYSQL_DATABASE: 'nef_db'
+      MYSQL_USER: 'nef_user'
+      MYSQL_PASSWORD: 'nef_pass'
+      MYSQL_ROOT_PASSWORD: 'nef_pass'
+    ports:
+      - '3306:3306'
+    expose:
+      - '3306'
+    volumes:
+      - ./db:/var/lib/mysql
+    networks:
+      - nef
+
+  nef_bot:
+    image: nef_bot
+    container_name: nef_bot
+    build: .
+    volumes:
+      - ../app:/usr/src/app
+    depends_on:
+      - nef_db
+    networks:
+      - nef
+    entrypoint: [ "sh", "-c", "sleep 3 && python3 app.py" ] # nef_bot should start after nef_db
+
